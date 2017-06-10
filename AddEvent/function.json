@@ -2,22 +2,14 @@
   "bindings": [
     {
       "authLevel": "anonymous",
-      "name": "req",
       "type": "httpTrigger",
-      "direction": "in"
+      "direction": "in",
+      "name": "req"
     },
     {
-      "name": "res",
       "type": "http",
-      "direction": "out"
-    },
-    {
-      "type": "documentDB",
-      "name": "doc",
-      "databaseName": "MettApp",
-      "collectionName": "Events",
-      "connection": "chaosmett_DOCUMENTDB",
-      "direction": "in"
+      "direction": "out",
+      "name": "res"
     },
     {
       "type": "documentDB",
@@ -27,6 +19,14 @@
       "createIfNotExists": false,
       "connection": "chaosmett_DOCUMENTDB",
       "direction": "out"
+    },
+    {
+      "type": "documentDB",
+      "name": "doc",
+      "databaseName": "MettApp",
+      "collectionName": "Events",
+      "connection": "chaosmett_DOCUMENTDB",
+      "direction": "in"
     }
   ],
   "disabled": false

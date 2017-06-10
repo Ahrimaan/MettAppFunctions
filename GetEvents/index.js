@@ -2,9 +2,7 @@ var tokenCheck = require('../checkToken');
 
 module.exports = function (context, req, doc) {
     context.log('Token: ' + req.headers.token);
-    context.log('Secret: ' + process.env.auth0secret);
-    let isDebug = process.env.debug === "true";
-    if (isDebug || tokenCheck(req.headers.token, context)) {
+    if (tokenCheck(req.headers.token, context)) {
         context.res = {
             status: 200,
             body: GetDocuments(doc)
@@ -20,5 +18,12 @@ module.exports = function (context, req, doc) {
 };
 
 function GetDocuments(doc) {
-    return doc.filter(item => new Date(item.EventDate).getTime() >= new Date().getTime());
+    let filteredItems = doc.filter(item => new Date(item.EventDate).getTime() <= new Date().getTime()).map(i => {
+        return {
+            eventDate:i.EventDate,
+            id:i.id
+        }
+     });
+
+    return filteredItems;
 }
