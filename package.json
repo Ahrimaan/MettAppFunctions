@@ -1,0 +1,11 @@
+{
+  "name": "mett-app-functions",
+  "version": "1.0.0",
+  "description": "Functions for Mett App",
+  "author": "Pawel Warmuth <warmuth.pawel@gmail.com>",
+  "private": true,
+  "dependencies": {
+    "request":"2.81.0",
+    "jwt-simple":"0.5.1"
+  }
+}
