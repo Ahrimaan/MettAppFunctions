@@ -18,10 +18,13 @@ module.exports = function (context, req, doc) {
 };
 
 function GetDocuments(doc) {
-    let filteredItems = doc.filter(item => new Date(item.EventDate).getTime() <= new Date().getTime()).map(i => {
+    let filteredItems = doc.filter(item => new Date(item.eventDate).getTime() >= new Date().getTime()).map(i => {
         return {
-            eventDate:i.EventDate,
-            id:i.id
+            eventDate:i.eventDate,
+            id:i.id,
+            createdBy:i.createdBy,
+            createDate:i.createDate,
+            participants:i.participants
         }
      });
 

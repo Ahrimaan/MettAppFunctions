@@ -1,18 +1,47 @@
 var tokenCheck = require('../checkToken');
-var request = require('request');
+var userService = require('../userService');
 
 module.exports = function (context, req, doc) {
     context.log('Token :' + req.headers.token);
     if (tokenCheck(req.headers.token, context)) {
-        let newEventDate = (req.body && req.body.eventDate) ?
-            new Date(req.body.eventDate) : undefined;
-        let newEvent = {
-            eventDate: newEventDate,
-            createDate: new Date(),
-            createdBy: 'TODO',
-            participants: []
+        if (allInformationProvided(req.body)) {
+            userService.getAllUsers(function (err, data) {
+                if (err) {
+                    context.res = {
+                        status: 500,
+                        body: JSON.stringify(err)
+                    };
+                    context.done();
+                    return;
+                }
+                let users = JSON.parse(data);
+                let user = users.filter(x => x.user_id === req.body.userid)[0];
+                let newEvent = {
+                    eventDate: new Date(req.body.eventDate),
+                    createDate: new Date(),
+                    createdBy: user.name,
+                    participants: []
+                }
+
+                if (isEventAvailable(doc, newEvent.eventDate)) {
+                    context.bindings.event = newEvent;
+                    context.res = {
+                        body: context.bindings.event
+                    }
+                    context.done();
+                } else {
+                    context.res = {
+                        status: 409,
+                        body: {
+                            'message': 'there is already an event with that date'
+                        }
+                    }
+                    context.done();
+                }
+            });
+
         }
-        if (!allInformationProvided(newEvent)) {
+        else {
             context.res = {
                 status: 400,
                 body: {
@@ -20,31 +49,21 @@ module.exports = function (context, req, doc) {
                 }
             };
             context.done();
-            return;
-        }
-        if (isEventAvailable(doc, newEventDate)) {
-            context.bindings.event = newEvent;
-            context.res = {
-                body: context.bindings.event
-            }
-        } else {
-            context.res = {
-                status: 409,
-                body: {
-                    'message': 'there is already an event with that date'
-                }
-            }
         }
     }
-    context.done();
-};
-
-function allInformationProvided(newEvent) {
-    return newEvent.eventDate !== undefined &&
-        newEvent.createdBy !== undefined;
+    else {
+        context.res = {
+            status: 401
+        }
+        context.done();
+    }
 }
 
-function isEventAvailable(doc, eventDate) {
-    let filtered = doc.filter(item => new Date(item.EventDate).getDate() === eventDate.getDate());
+function allInformationProvided(newEvent) {
+    return newEvent !== undefined && newEvent.eventDate !== undefined;
+}
+
+function isEventAvailable(doc, eventDate, result) {
+    let filtered = doc.filter(item => new Date(item.eventDate).getDate() === eventDate.getDate());
     return filtered.length < 1;
 }
