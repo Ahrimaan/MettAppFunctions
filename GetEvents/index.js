@@ -17,8 +17,24 @@ module.exports = function (context, req, doc) {
     context.done();
 };
 
+function filterEvents(eventA,eventB){
+    let aDate = new Date(eventA.eventDate).getTime();
+    let bDate = new Date(eventB.eventDate).getTime();
+    if(aDate < bDate)
+    {
+        return -1;
+    }
+    if(aDate > bDate){
+        return 1;
+    }
+
+    return 0;
+}
+
 function GetDocuments(doc) {
-    let filteredItems = doc.filter(item => new Date(item.eventDate).getTime() >= new Date().getTime()).map(i => {
+    let filteredItems = doc.filter(item => new Date(item.eventDate).getTime() >= new Date().getTime())
+    .sort(filterEvents)    
+    .map(i => {
         return {
             eventDate:i.eventDate,
             id:i.id,
