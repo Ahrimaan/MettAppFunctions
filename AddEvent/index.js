@@ -3,43 +3,54 @@ var userService = require('../userService');
 
 module.exports = function (context, req, doc) {
     context.log('Token :' + req.headers.token);
-    if (tokenCheck(req.headers.token, context)) {
+    let token = tokenCheck(req.headers.token, context);
+    if (token) {
         if (allInformationProvided(req.body)) {
-            userService.getAllUsers(function (err, data) {
-                if (err) {
-                    context.res = {
-                        status: 500,
-                        body: JSON.stringify(err)
-                    };
-                    context.done();
-                    return;
-                }
-                let users = JSON.parse(data);
-                let user = users.filter(x => x.user_id === req.body.userid)[0];
-                let newEvent = {
-                    eventDate: new Date(req.body.eventDate),
-                    createDate: new Date(),
-                    createdBy: user.name,
-                    participants: []
-                }
-
-                if (isEventAvailable(doc, newEvent.eventDate)) {
-                    context.bindings.event = newEvent;
-                    context.res = {
-                        body: context.bindings.event
+            let newEventDate = new Date(req.body.eventDate);
+            if (isEventAvailable(doc, newEventDate)) {
+                userService.getAllUsers(function (err, data) {
+                    if (err) {
+                        context.res = {
+                            status: 500,
+                            body: JSON.stringify(err)
+                        };
+                        context.done();
+                        return;
                     }
-                    context.done();
-                } else {
-                    context.res = {
-                        status: 409,
-                        body: {
-                            'message': 'there is already an event with that date'
+                    let users = JSON.parse(data);
+                    let user = users.filter(x => x.user_id === token.sub)[0];
+                    if (user.app_metadata.isAdmin === 'true') {
+                        let newEvent = {
+                            eventDate: new Date(req.body.eventDate),
+                            createDate: new Date(),
+                            createdBy: user.name,
+                            participants: []
                         }
-                    }
-                    context.done();
-                }
-            });
 
+                        context.bindings.event = newEvent;
+                        context.res = {
+                            body: context.bindings.event
+                        }
+                        context.done();
+                    } else {
+                        context.res = {
+                            status: 401,
+                            body: {
+                                'message': 'User is not authenticated or expired'
+                            }
+                        }
+                        context.done();
+                    }
+                });
+            } else {
+                context.res = {
+                    status: 409,
+                    body: {
+                        'message': 'there is already an event with that date'
+                    }
+                }
+                context.done();
+            }
         }
         else {
             context.res = {
@@ -53,7 +64,10 @@ module.exports = function (context, req, doc) {
     }
     else {
         context.res = {
-            status: 401
+            status: 401,
+            body: {
+                'message': 'User is not authenticated or expired'
+            }
         }
         context.done();
     }

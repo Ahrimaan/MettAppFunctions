@@ -1,14 +1,15 @@
-var jwt = require('jwt-simple');
+var jwt = require('jsonwebtoken');
 
 module.exports = function(token,context){
     if(process.env.debug === "true"){
         return true;
     }
     try{
-        var token = jwt.decode(token, process.env.auth0secret, false, 'HS256');
-        return token !== undefined;
+        let secret =  new Buffer(process.env.tokenSecret, "base64")
+        let decoded = jwt.verify(token,secret,{ ignoreExpiration:false});
+        return decoded;
     }catch (err) {
         context.log(err);
     }
-    return false;
+    return undefined;
 }

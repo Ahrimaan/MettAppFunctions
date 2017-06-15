@@ -1,7 +1,5 @@
 var request = require('request');
 
-var request = require("request");
-
 var mngtApiOptions = {
     method: 'POST',
     url: process.env.auth0Domain + '/oauth/token',
