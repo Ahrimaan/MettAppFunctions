@@ -18,7 +18,7 @@ module.exports = function (context, req, doc) {
                         return;
                     }
                     let users = JSON.parse(data);
-                    let user = users.filter(x => x.user_id === token.sub)[0];
+                    let user = process.env.debug === 'true' ? { app_metadata: { isAdmin:'true' }, name:'TESTNAME'} : users.filter(x => x.user_id === token.sub)[0];
                     if (user.app_metadata.isAdmin === 'true') {
                         let newEvent = {
                             eventDate: new Date(req.body.eventDate),
