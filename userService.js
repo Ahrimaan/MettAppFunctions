@@ -14,9 +14,7 @@ var mngtApiOptions = {
     json: true
 };
 
-
-
-module.exports.getAllUsers = function (callback) {
+function getAllUsers(callback) {
     request(mngtApiOptions, function (err, response, body) {
         if (err) {
             callback(err, null);
@@ -25,8 +23,8 @@ module.exports.getAllUsers = function (callback) {
             let accessToken = body.access_token;
             getUserList(accessToken, callback);
         }
-        else{
-            callback(body,null);
+        else {
+            callback(body, null);
         }
     })
     // Getold token fromdb
@@ -34,18 +32,16 @@ module.exports.getAllUsers = function (callback) {
     //fetch all users
 };
 
-
-
-module.exports.getUserInformation = function (userId, callback) {
+function getUserInformation(userId, callback) {
     getAllUsers(function (err, result) {
         if (err) {
             callback(err, null);
         } else {
-            let singleUser = result.filter(x => x.user_id == userId)[0];
+            let singleUser = JSON.parse(result).filter(x => x.user_id == userId)[0];
             callback(null, singleUser);
         }
-    })
-};
+    });
+}
 
 function getUserList(token, callback) {
     let getUserOptions = {
@@ -57,11 +53,11 @@ function getUserList(token, callback) {
         if (err) {
             callback(err, null);
         }
-        if(resp.statusCode === 200){
+        if (resp.statusCode === 200) {
             callback(null, body);
         }
         else {
-            callback(body,null);
+            callback(body, null);
         }
     });
 }
@@ -74,3 +70,6 @@ function getExpirationDate(expiresIn) {
 function isExpired(expireTime) {
     return new Date().getTime() <= state.user.expiresIn
 }
+
+module.exports.getAllUsers = getAllUsers;
+module.exports.getUserInformation = getUserInformation;
