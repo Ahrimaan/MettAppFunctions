@@ -5,7 +5,8 @@
   "author": "Pawel Warmuth <warmuth.pawel@gmail.com>",
   "private": true,
   "dependencies": {
-    "request": "2.81.0",
-    "jsonwebtoken": "7.4.1"
+    "jsonwebtoken": "7.4.1",
+    "mongodb": "^2.2.29",
+    "request": "2.81.0"
   }
 }

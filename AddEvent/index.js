@@ -5,14 +5,17 @@ module.exports = function (context, req, doc) {
     context.log('Token :' + req.headers.token);
     let token = tokenCheck(req.headers.token, context);
     if (token) {
+        context.log('token check passed : ' + token.sub);
         if (allInformationProvided(req.body)) {
             let newEventDate = new Date(req.body.eventDate);
+            context.log('all information provided: ' + newEventDate)
             if (isEventAvailable(doc, newEventDate)) {
+                context.log('Event is available: ' + newEventDate)
                 userService.getAllUsers(function (err, data) {
                     if (err) {
                         context.res = {
                             status: 500,
-                            body: JSON.stringify(err)
+                            body: err
                         };
                         context.done();
                         return;
