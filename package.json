@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {
     "jsonwebtoken": "7.4.1",
-    "mongodb": "^2.2.29",
-    "request": "2.81.0"
+    "request": "2.81.0",
+    "documentdb":"1.12.0"
   }
 }
