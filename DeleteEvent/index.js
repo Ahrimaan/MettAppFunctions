@@ -23,7 +23,7 @@ module.exports = function (context, req) {
             let users = JSON.parse(data);
             let user = users.filter(x => x.user_id === token.sub)[0];
             if (user.app_metadata.isAdmin === 'true') {
-                client.deleteDocument(req.body.eventRef, (err, result) => {
+                client.deleteDocument(req.body.eventRef, function(err)  {
                     if (err) {
                         context.res = {
                             status: 500,
@@ -33,7 +33,7 @@ module.exports = function (context, req) {
                         return;
                     }
                     context.res = {
-                        body: result
+                        body: 'Event Deleted'
                     };
                     context.done();
                     return;

@@ -1,5 +1,8 @@
 var tokenCheck = require('../checkToken');
 var userService = require('../userService');
+var DocumentClient = require('documentdb').DocumentClient;
+var client = new DocumentClient(process.env.dbHost, { masterKey: process.env.dbMasterKey });
+var docDb = require('../docDbHelper')
 
 module.exports = function (context, req, doc) {
     context.log('Token :' + req.headers.token);
@@ -30,12 +33,21 @@ module.exports = function (context, req, doc) {
                             createdById: token.sub,
                             participants: []
                         }
-
-                        context.bindings.event = newEvent;
-                        context.res = {
-                            body: context.bindings.event
-                        }
-                        context.done();
+                        addItem(newEvent, (error, result) => {
+                            if (error) {
+                                context.res = {
+                                    status: 500,
+                                    body: error
+                                };
+                                context.done();
+                                return;
+                            }
+                            newEvent.id = result._self;
+                            context.res = {
+                                body: newEvent
+                            };
+                            context.done();
+                        })
                     } else {
                         context.res = {
                             status: 401,
@@ -84,4 +96,26 @@ function allInformationProvided(newEvent) {
 function isEventAvailable(doc, eventDate, result) {
     let filtered = doc.filter(item => new Date(item.eventDate).getDate() === eventDate.getDate());
     return filtered.length < 1;
+}
+
+function addItem(newItem, callback) {
+    docDb.getOrCreateDatabase(client, 'MettApp', (err, result) => {
+        if (err) {
+            callback(err, null);
+            return;
+        }
+        docDb.getOrCreateCollection(client, result._self, 'Events', (collErr, collResult) => {
+            if (collErr) {
+                callback(collErr, null);
+                return;
+            }
+            client.createDocument(collResult._self, newItem, (createErr, doc) => {
+                if (createErr) {
+                    callback(createErr, null);
+                    return;
+                }
+                callback(null, doc);
+            })
+        });
+    })
 }
