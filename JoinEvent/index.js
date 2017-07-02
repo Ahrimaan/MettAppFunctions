@@ -82,42 +82,4 @@ function updateItem(eventId, participant, callback) {
             });
         }
     });
-
-    /* docDb.getOrCreateDatabase(client, 'MettApp', (err, result) => {
-        if (err) {
-            callback(err);
-        }
-        else {
-            docDb.getOrCreateCollection(client, result._self, 'MettApp', (colErr, colRes) => {
-                if (colErr) {
-                    callback(colErr);
-                } else {
-                    var querySpec = {
-                        query: 'SELECT * FROM root r WHERE r._self = @id',
-                        parameters: [{
-                            name: '@id',
-                            value: eventId
-                        }]
-                    };
-                    client.queryDocuments(colRes._self, querySpec).toArray(function (docErr, doc) {
-                        if (err) {
-                            callback(err);
-                        }
-                        else {
-                            let event = doc[0];
-                            event.participants.push(participant);
-                            client.replaceDocument(event._self, event, (repErr, repRes) => {
-                                if (repErr) {
-                                    callback(repErr);
-                                }
-                                else {
-                                    callback(null, repRes);
-                                }
-                            })
-                        };
-                    });
-                }
-            });
-        }
-    }); */
 }
