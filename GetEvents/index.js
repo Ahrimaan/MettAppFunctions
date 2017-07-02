@@ -37,7 +37,8 @@ function GetDocuments(doc) {
     .map(i => {
         return {
             eventDate:i.eventDate,
-            id:i._self,
+            id:i.id,
+            ref:i._self,
             createdBy:i.createdBy,
             createDate:i.createDate,
             participants:i.participants

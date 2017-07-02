@@ -42,7 +42,8 @@ module.exports = function (context, req, doc) {
                                 context.done();
                                 return;
                             }
-                            newEvent.id = result._self;
+                            newEvent.id = result.id;
+                            newEvent.ref = result._self;
                             context.res = {
                                 body: newEvent
                             };
