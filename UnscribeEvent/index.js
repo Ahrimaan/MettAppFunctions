@@ -16,13 +16,7 @@ module.exports = function (context, req, doc) {
                 };
                 context.done();
             }
-            let participantData = {
-                userId: result.user_id,
-                userName: result.name,
-                value: req.body.value,
-                specialNeeds: req.body.special,
-                payed: req.body.payed
-            }
+            context.log(result);
             if (doc.filter(x => x._self === req.body.eventId).length <= 0) {
                 context.res = {
                     status: 404
@@ -38,7 +32,7 @@ module.exports = function (context, req, doc) {
                 }
                 context.done();
             } else {
-                updateItem(req.body.eventId, participantData, (err, result) => {
+                updateItem(req.body.eventId, result.user_id, (err, result) => {
                     if (err) {
                         context.res = {
                             status: 500,
@@ -64,21 +58,21 @@ module.exports = function (context, req, doc) {
     }
 };
 
-function updateItem(eventId, participant, callback) {
+function updateItem(eventId, userId, callback) {
     client.readDocument(eventId, (err, result) => {
         if (err) {
             callback(err);
         }
         else {
             let event = result;
-            event.partticipants =  event.participants.splice(event.participants.findIndex(part => part.userId === participant.user_id),1);
+            event.partticipants =  event.participants.splice(event.participants.findIndex(part => part.userId === userId),1);
 
             client.replaceDocument(eventId, event, (repErr, repRes) => {
                 if (repErr) {
                     callback(repErr);
                 }
                 else {
-                    callback(null, repRes);
+                    callback(null, 'unscribed');
                 }
             });
         }
