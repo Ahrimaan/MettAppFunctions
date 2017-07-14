@@ -8,46 +8,36 @@ module.exports = function (context, req, doc) {
     context.log('Token: ' + req.headers.token);
     let userToken = tokenCheck(req.headers.token, context)
     if (userToken) {
-        userService.getUserInformation(userToken.sub, (err, result) => {
-            if (err) {
-                context.res = {
-                    status: 500,
-                    body: err
-                };
-                context.done();
-            }
-            
-            if (doc.filter(x => x._self === req.body.eventId).length <= 0) {
-                context.res = {
-                    status: 404
-                };
-                context.done();
-            }
-            if (doc.filter(x => x._self === req.body.eventId)[0].participants.filter(part => part.userId === result.user_id).length <= 0) {
-                context.res = {
-                    status:'409',
-                    body: {
-                        'message':'you are not subscribed, dont try to call my api by hand ;) '
-                    }
+        if (doc.filter(x => x._self === req.body.eventId).length <= 0) {
+            context.res = {
+                status: 404
+            };
+            context.done();
+        }
+        if (doc.filter(x => x._self === req.body.eventId)[0].participants.filter(part => part.userId === req.body.userId).length <= 0) {
+            context.res = {
+                status: '409',
+                body: {
+                    'message': 'you are not subscribed, dont try to call my api by hand ;) '
                 }
-                context.done();
-            } else {
-                updateItem(req.body.eventId, result.user_id, (err, result) => {
-                    if (err) {
-                        context.res = {
-                            status: 500,
-                            body: err
-                        };
-                        context.done();
-                    } else {
-                        context.res = {
-                            body: result
-                        };
-                        context.done();
-                    }
-                });
             }
-        });
+            context.done();
+        } else {
+            updateItem(req.body.eventId, req.body.userId, (err, result) => {
+                if (err) {
+                    context.res = {
+                        status: 500,
+                        body: err
+                    };
+                    context.done();
+                } else {
+                    context.res = {
+                        body: result
+                    };
+                    context.done();
+                }
+            });
+        }
     }
     else {
         context.res = {
@@ -65,7 +55,7 @@ function updateItem(eventId, userId, callback) {
         }
         else {
             let event = result;
-            event.partticipants =  event.participants.splice(event.participants.findIndex(part => part.userId === userId),1);
+            event.partticipants = event.participants.splice(event.participants.findIndex(part => part.userId === userId), 1);
 
             client.replaceDocument(eventId, event, (repErr, repRes) => {
                 if (repErr) {
