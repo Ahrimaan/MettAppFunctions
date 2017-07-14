@@ -16,7 +16,7 @@ module.exports = function (context, req, doc) {
                 };
                 context.done();
             }
-            context.log(result);
+            
             if (doc.filter(x => x._self === req.body.eventId).length <= 0) {
                 context.res = {
                     status: 404
@@ -69,9 +69,11 @@ function updateItem(eventId, userId, callback) {
 
             client.replaceDocument(eventId, event, (repErr, repRes) => {
                 if (repErr) {
+                    context.log(repErr);
                     callback(repErr);
                 }
                 else {
+                    context.log('unscribed');
                     callback(null, 'unscribed');
                 }
             });
